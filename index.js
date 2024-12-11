@@ -77,8 +77,6 @@ const orderState = {
                 CHASE_SIDE === 'BUY' ? bestBid - PRICE_OFFSET : bestAsk + PRICE_OFFSET
             );
 
-
-
             const roundedQuantity = roundToStepSize(orderState.remainingQuantity);
 
             if (orderState.isUpdatingOrder || orderState.orderFilled) {
@@ -86,14 +84,14 @@ const orderState = {
             }
 
             if (!orderState.currentOrderId) {
-                console.log(`[TRADE] Placing initial ${CHASE_SIDE} order @ ${desiredPrice} with quantity ${roundedQuantity}`);
+                console.log(`[TRADE] Placing initial ${CHASE_SIDE} order @ ${desiredPrice}. Quantity: ${roundedQuantity}`);
                 orderState.isUpdatingOrder = true;
 
                 try {
                     const orderResponse = await placeLimitOrder(SYMBOL, desiredPrice, roundedQuantity, CHASE_SIDE);
                     orderState.currentOrderId = orderResponse.orderId;
                     orderState.currentOrderPrice = desiredPrice;
-                    console.log(`[SUCCESS] Order #${orderState.currentOrderId} placed @ ${desiredPrice} with quantity ${roundedQuantity}`);
+                    console.log(`[SUCCESS] Order #${orderState.currentOrderId} placed @ ${desiredPrice}. Quantity: ${roundedQuantity}`);
                 } catch (error) {
                     console.error("[ERROR] Failed to place initial order:", error?.response?.data?.msg || error?.response);
                 } finally {
@@ -104,7 +102,7 @@ const orderState = {
             }
 
             if (orderState.currentOrderPrice !== desiredPrice) {
-                console.log(`[TRADE] Canceling order #${orderState.currentOrderId} and placing new order @ ${desiredPrice} with quantity ${roundedQuantity}`);
+                console.log(`[TRADE] Canceling order #${orderState.currentOrderId} and placing new order @ ${desiredPrice}. Quantity: ${roundedQuantity}`);
                 orderState.isUpdatingOrder = true;
 
                 try {
@@ -114,7 +112,7 @@ const orderState = {
                     const orderResponse = await placeLimitOrder(SYMBOL, desiredPrice, roundedQuantity, CHASE_SIDE);
                     orderState.currentOrderId = orderResponse.orderId;
                     orderState.currentOrderPrice = desiredPrice;
-                    console.log(`[TRADE] New order #${orderState.currentOrderId} placed @ ${desiredPrice} with quantity ${roundedQuantity}`);
+                    console.log(`[TRADE] New order #${orderState.currentOrderId} placed @ ${desiredPrice}. Quantity: ${roundedQuantity}`);
                 } catch (error) {
                     console.error("[ERROR] Failed to update order:", error?.response?.data?.msg || error?.response);
                 } finally {
