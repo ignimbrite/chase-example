@@ -70,9 +70,24 @@ async function cancelOrder(symbol, orderId) {
     return httpCall('delete', '/fapi/v1/order', params);
 }
 
+async function getTradingRules(symbol) {
+    const exchangeInfo = await httpCall('get', '/fapi/v1/exchangeInfo');
+    const symbolInfo = exchangeInfo.symbols.find(s => s.symbol === symbol);
+    if (!symbolInfo) {
+        throw new Error(`Trading rules for symbol ${symbol} not found.`);
+    }
+
+    const priceFilter = symbolInfo.filters.find(filter => filter.filterType === 'PRICE_FILTER');
+
+    return {
+        tickSize: parseFloat(priceFilter?.tickSize || 0),
+    };
+}
+
 module.exports = {
     getListenKey,
     keepListenKeyAlive,
     placeLimitOrder,
     cancelOrder,
+    getTradingRules,
 };

@@ -1,4 +1,4 @@
-const { getListenKey, keepListenKeyAlive, placeLimitOrder, cancelOrder } = require('./binance/binanceApi');
+const { getListenKey, keepListenKeyAlive, placeLimitOrder, cancelOrder, getTradingRules } = require('./binance/binanceApi');
 const { connectUserDataStream, connectMarketDataStream } = require('./binance/binanceWs');
 
 const SYMBOL = process.env.SYMBOL;
@@ -15,6 +15,12 @@ const orderState = {
 };
 
 (async () => {
+    const { tickSize } = await getTradingRules(SYMBOL);
+
+    function roundToTickSize(price) {
+        return parseFloat((Math.floor(price / tickSize) * tickSize).toFixed(tickSize.toString().split('.')[1]?.length || 0));
+    }
+
     const listenKey = await getListenKey();
 
     const userDataWs = connectUserDataStream(
@@ -49,7 +55,10 @@ const orderState = {
             const data = JSON.parse(msg);
             const bestBid = parseFloat(data.b);
             const bestAsk = parseFloat(data.a);
-            const desiredPrice = CHASE_SIDE === 'BUY' ? bestBid - PRICE_OFFSET : bestAsk + PRICE_OFFSET;
+
+            const desiredPrice = roundToTickSize(
+                CHASE_SIDE === 'BUY' ? bestBid - PRICE_OFFSET : bestAsk + PRICE_OFFSET
+            );
 
             if (orderState.isUpdatingOrder || orderState.orderFilled) {
                 return;
