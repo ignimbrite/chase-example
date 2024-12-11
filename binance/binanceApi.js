@@ -78,9 +78,11 @@ async function getTradingRules(symbol) {
     }
 
     const priceFilter = symbolInfo.filters.find(filter => filter.filterType === 'PRICE_FILTER');
+    const lotSizeFilter = symbolInfo.filters.find(filter => filter.filterType === 'LOT_SIZE');
 
     return {
         tickSize: parseFloat(priceFilter?.tickSize || 0),
+        stepSize: parseFloat(lotSizeFilter?.stepSize || 0),
     };
 }
 
